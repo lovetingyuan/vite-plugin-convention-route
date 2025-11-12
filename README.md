@@ -17,6 +17,19 @@ Install
 npm i vite-plugin-convention-route -D
 ```
 
+vite.config.ts
+
+```ts
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig(() => {
+  return {
+    plugins: [react(), conventionRoute()],
+  }
+})
+```
+
 App.tsx
 
 ```ts
