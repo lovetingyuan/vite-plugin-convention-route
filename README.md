@@ -2,6 +2,13 @@
 
 A Vite-based file system routing plugin for React Router, providing Next.js-like capabilities.
 
+- File system-based routing conventions
+  - `/a/[b]/index.tsx` --> `/a/:b`
+  - `/a/-[b]/index.tsx` --> `/a/:b?`
+  - `/a/b/index.tsx` --> `/a/b`
+  - `/a/-b/index.tsx` --> `/a/b?`
+  - `/a/[...b]/index.tsx` --> `/a/:b`, `/a/:b/:c` ...
+
 ### Usage
 
 Install
