@@ -1,3 +1,27 @@
 # vite-plugin-convention-route
 
-基于 vite 的文件路径约定式 react-router 插件，提供类似于 Next.js 的能力
+A Vite-based file system routing plugin for React Router, providing Next.js-like capabilities.
+
+### Usage
+
+Install
+
+```sh
+npm i vite-plugin-convention-route -D
+```
+
+App.tsx
+
+```ts
+import routes from 'virtual:route?routePath=./pages'
+import { createBrowserRouter } from 'react-router'
+const router = createBrowserRouter(routes)
+```
+
+### TypeScript
+
+add this to d.ts
+
+```ts
+/// <reference types="vite-plugin-convention-route/client" />
+```
