@@ -1,0 +1,35 @@
+{
+  "name": "vite-plugin-convention-route",
+  "version": "0.0.1",
+  "description": "Vite plugin support react convention route like next.js",
+  "type": "module",
+  "main": "dist/index.js",
+  "keywords": [
+    "vite",
+    "vite-plugin",
+    "virtual-module",
+    "convention",
+    "react",
+    "react-route"
+  ],
+  "files": [
+    "dist",
+    "client.d.ts"
+  ],
+  "homepage": "https://github.com/lovetingyuan/vite-plugin-convention-route",
+  "author": "tingyuan",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsup index.ts --dts --format esm && tsup route.ts --format esm --external react --external react-router"
+  },
+  "peerDependencies": {
+    "vite": "^6 || ^7"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.3"
+  }
+}
