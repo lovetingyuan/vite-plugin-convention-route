@@ -4,13 +4,18 @@
   "description": "Vite plugin support react convention route like next.js",
   "type": "module",
   "main": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./client": "./client.d.ts"
+  },
+  "sideEffects": false,
   "keywords": [
     "vite",
     "vite-plugin",
     "virtual-module",
     "convention",
     "react",
-    "react-route"
+    "react-router"
   ],
   "files": [
     "dist",
@@ -20,16 +25,25 @@
   "author": "tingyuan",
   "license": "MIT",
   "scripts": {
-    "build": "tsup index.ts --dts --format esm && tsup route.ts --format esm --external react --external react-router"
+    "build": "tsup index.ts --dts --format esm && tsup route.ts --format esm --external react --external react-router",
+    "build:route": "tsup route.ts --format esm --external react --external react-router --out-dir .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "play": "cd playground && npm run dev"
   },
   "peerDependencies": {
+    "react": ">=18",
+    "react-router": ">=6",
     "vite": "^6 || ^7"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
+    "@types/react": "^19.2.14",
+    "fast-glob": "^3.3.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tsup": "^8.5.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.4"
   }
 }

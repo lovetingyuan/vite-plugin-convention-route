@@ -1,11 +1,16 @@
 import { normalizePath, type Plugin } from "vite";
 import { readFile } from "fs/promises";
 import { dirname, relative, resolve } from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const VirtualId = "virtual:route";
 
 export default function conventionRoutePlugin(): Plugin {
   let rootPath = "";
+  let routeJsCode: string | null = null;
+  let resolvedRoutePaths: Map<string, string> = new Map(); // virtualId -> absolute pages dir
   return {
     name: "vite-plugin-convention-route",
     enforce: "pre", // 在其他插件之前执行
@@ -18,7 +23,7 @@ export default function conventionRoutePlugin(): Plugin {
      */
     resolveId(id, importer) {
       if (id.startsWith(VirtualId)) {
-        return id + "&importer=" + importer;
+        return importer ? id + "&importer=" + importer : id;
       }
       return null;
     },
@@ -29,12 +34,14 @@ export default function conventionRoutePlugin(): Plugin {
      */
     async load(id: string) {
       if (id.startsWith(VirtualId)) {
-        const code = await readFile(
-          resolve(import.meta.dirname, "./route.js"),
-          "utf8"
-        );
+        if (!routeJsCode) {
+          routeJsCode = await readFile(
+            resolve(__dirname, "./route.js"),
+            "utf8"
+          );
+        }
 
-        const query = id.split("?")[1];
+        const query = id.split("?")[1] ?? "";
 
         const params = new URLSearchParams(query);
         let routePath = params.get("routePath");
@@ -43,7 +50,7 @@ export default function conventionRoutePlugin(): Plugin {
         }
         if (routePath[0] !== "/") {
           const importer = params.get("importer");
-          if (!importer) {
+          if (!importer || importer === "undefined") {
             throw new Error(
               "something is wrong, please try to use absolute path"
             );
@@ -60,7 +67,9 @@ export default function conventionRoutePlugin(): Plugin {
           routePath = normalizePath("/" + relative(rootPath, pagesDir));
         }
 
-        const _code = code.replaceAll("__ROUTERS_PATH__", routePath);
+        const _code = routeJsCode.replaceAll("__ROUTERS_PATH__", routePath);
+        // Track which pages directory this virtual module watches
+        resolvedRoutePaths.set(id.split("&importer=")[0], normalizePath(resolve(rootPath, routePath.slice(1))));
         return {
           code: _code,
           map: null, // 可以返回 source map，这里返回 null
@@ -71,12 +80,20 @@ export default function conventionRoutePlugin(): Plugin {
 
     /**
      * 处理热更新
-     * 当虚拟模块需要更新时，可以触发 HMR
+     * 当 pages 目录下有文件增删时，使虚拟模块失效以触发重新加载
      */
-    // handleHotUpdate() {
-    // 检查是否有文件变化需要更新虚拟模块
-    // 这里可以根据需要实现自定义的热更新逻辑
-    // return null;
-    // },
+    handleHotUpdate({ file, server }) {
+      const normalizedFile = normalizePath(file);
+      for (const [virtualId, pagesDir] of resolvedRoutePaths) {
+        if (normalizedFile.startsWith(pagesDir + "/")) {
+          const mod = server.moduleGraph.getModuleById(virtualId);
+          if (mod) {
+            server.moduleGraph.invalidateModule(mod);
+            server.ws.send({ type: "full-reload" });
+          }
+          break;
+        }
+      }
+    },
   };
 }
